@@ -1,0 +1,63 @@
+
+The S1AP Simulator program executes a set of instructions that are specified in a file and fed to it.
+To start the simulator program start the program as follows
+In the Erl shell
+-application:start(s1apSim).
+
+Once the s1apSim application is started you can run the test_interpreter to execute the instruction set that you have
+specified in a text file as follows
+
+test_interpreter:exec_prg("prg6").
+
+where prg6 is a file located in the same directory as the beam files of s1ap
+
+
+The files with the instruction can have these different types of instruction
+The instruction set must have the following structrue
+{instructionset, [{Instruction1}, {Instruction2}, ....]
+
+The following instruction are available
+
+ENB Starting Instruction:
+To start a ENB simulator, the instruction is 
+		{startEnbs, Num_of_Enbs, {Parameter, Parameter_List}}
+where Parameters are 
+MME S1AP Peer IP address in the form {10.0.0.1}, transport protocol tcp | sctp, S1AP port, Enb Name
+Parameter List is a list of  enb configuration tuples in the form [{itemname, value}, {itemname,value}, ...]
+For example a enb configuration would be 
+						[	{plmnId, <<16#123456:24>>}, 
+							{enbId, {'macroENB-ID', <<16#12345:20>>}}, {enbIdIncrBy, 1},
+							{tac, <<16#10:16>>},{tacIncrBy, 10},
+							{bdPlmnId, [<<123456:24>>, <<654321:24>>]},
+							{pagingDrx, v32}
+						]
+If the Num_of_Enbs is greater than 1 then simulator automatically creates multiple simulated instances of ENBs
+appending a increasing integer to the ENB name, and incrementing the TAC and ENB-ID. You can control the amount
+increment to TAC and ENB-ID by the tuple {enbIdIncrBy, value} and {tacIncrBy, value)
+
+UE starting Instruction			
+To start a Simulated UE the instruction is as follows
+	{startUes, Num_of_Ues, Connect_to_Enb, [Parameter List]}
+where startUes is the command
+Num_of_Ues is the number of Ues that are to be started
+Connect to Enb is the name of the ENB (already started) to which the UE should be connected to.
+Parameter List is the list of Ue config items. These are specified as {key, value} tuples as given in the example below
+						[	
+							{tai,  [{plmnId, <<16#123456:24>>},  {tac, <<16#10:16>>}] },
+							{cgi,  [ {plmnId, <<16#123456:24>>}, {cellId, <<123456:28>>}] },
+							{rrcEstCause, 'mt-Access'},
+							{emmMsgType, <<16#41:8>>},
+							{epsAttachNasKey, <<16#71:8>>},
+							{mobileId,  {imsi, [1,2,3,4,5,6,7,8,9,0,1,2,3,4]} }, {mobileIdIncrBy, 1},
+							{ueNetCapability, <<16#E0E0:16>>},
+							{bearerId,  <<0:4>>},
+							{imei, [1,2,3,4,5,6,7,8,9]},
+							{pti, <<16#01:8>>},
+							{esmMsgType , <<16#d0:8>>},
+							{pdnType,  <<1:4>>}, {reqType, <<1:4>>},
+							{esmInfoTrfFlag, 1},
+							{apn, "myapn"}
+					    ],
+	if more than one UE is started then mobile Id of the EU needs to be changed for each UE. The simulator program will
+	automatically increment the mobile id if the (mobileIdIncrBy, Increment} command is given in the Parameter list.
+	
